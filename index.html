@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /*custom font*/
+    @import url(https://fonts.googleapis.com/css?family=Montserrat);
+
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+
+    /*basic reset*/
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+
+    body {
+      font-family: montserrat, arial, verdana;
+    }
+
+    /*form styles*/
+    #msform,
+    form {
+      width: 80%;
+      margin: 50px auto;
+      text-align: center;
+      position: relative;
+    }
+
+    #msform fieldset,
+    form fieldset {
+      background: white;
+      border: 0 none;
+      border-radius: 3px;
+      box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+      padding: 20px 30px;
+      box-sizing: border-box;
+      width: 85%;
+      margin: 0 auto;
+
+      /*stacking fieldsets above each other*/
+      position: relative;
+    }
+
+    /*Hide all except first fieldset*/
+    #msform fieldset:not(:first-of-type),
+    form fieldset:not(:first-of-type) {
+      display: none;
+    }
+
+    /*inputs*/
+    #msform input,
+    #msform textarea,
+    select,
+    textarea,
+    input {
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: montserrat;
+      color: #2C3E50;
+      font-size: 13px;
+    }
+
+    /*buttons*/
+    #msform .action-button,
+    form .action-button {
+      width: 100px;
+      background: #27AE60;
+      font-weight: bold;
+      color: white;
+      border: 0 none;
+      border-radius: 1px;
+      cursor: pointer;
+      padding: 10px;
+      margin: 10px 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    #msform .action-button:hover,
+    #msform .action-button:focus,
+    form .action-button:hover,
+    form .action-button:focus {
+      box-shadow: 0 0 0 2px white, 0 0 0 3px #27AE60;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle {
+      display: flex !important;
+    }
+
+    /*headings*/
+    .fs-title {
+      font-size: 15px;
+      text-transform: uppercase;
+      color: #2C3E50;
+      margin: 2rem 0;
+    }
+
+    .fs-subtitle {
+      font-weight: normal;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .form-toggle {
+      display: none !important;
+    }
+
+    .action-button {
+      margin: 1rem 0;
+      display: inline-block;
+    }
+
+    /*progressbar*/
+    #progressbar {
+      margin-bottom: 30px;
+      overflow: hidden;
+      /*CSS counters to number the steps*/
+      counter-reset: step;
+      display: none;
+    }
+
+    #progressbar li {
+      list-style-type: none;
+      color: white;
+      text-transform: uppercase;
+      font-size: 9px;
+      width: 33.33%;
+      float: left;
+      position: relative;
+    }
+
+    #progressbar li:before {
+      content: counter(step);
+      counter-increment: step;
+      width: 20px;
+      line-height: 20px;
+      display: block;
+      font-size: 10px;
+      color: #333;
+      background: white;
+      border-radius: 3px;
+      margin: 0 auto 5px auto;
+    }
+
+    /*progressbar connectors*/
+    #progressbar li:after {
+      content: '';
+      width: 100%;
+      height: 2px;
+      background: white;
+      position: absolute;
+      left: -50%;
+      top: 9px;
+      z-index: -1;
+      /*put it behind the numbers*/
+    }
+
+    #progressbar li:first-child:after {
+      /*connector not needed before the first step*/
+      content: none;
+    }
+
+    /*marking active/completed steps green*/
+    /*The number of the step and the connector before it = green*/
+    #progressbar li.active:before,
+    #progressbar li.active:after {
+      background: #27AE60;
+      color: white;
+    }
+
+    .planets-wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+      padding: 0 4rem;
+      margin: 2rem 0;
+    }
+
+    .planet-flex {
+      box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+      padding: 1rem;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .container {
+      padding: 0 4rem;
+    }
+
+    .planet-flex span {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .container span {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid;
+      border-color: #FF3D00 transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    .show {
+      display: block !important;
+    }
+
+    .modal-content {
+      display: none;
+    }
+
+    #result-container {
+      margin: 2rem 0;
+    }
+
+    /* CSS */
+    .close-btn {
+      background-color: #EA4C89;
+      border-radius: 8px;
+      border-style: none;
+      box-sizing: border-box;
+      color: #FFFFFF;
+      cursor: pointer;
+      display: inline-block;
+      font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      height: 40px;
+      line-height: 20px;
+      list-style: none;
+      margin: 0;
+      outline: none;
+      padding: 10px 16px;
+      position: relative;
+      text-align: center;
+      text-decoration: none;
+      transition: color 100ms;
+      vertical-align: baseline;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      margin: 1.5rem 0;
+      display: none;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+      background-color: #F082AC;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    fieldset h5 {
+      text-align: left;
+      color: crimson;
+      margin: .6rem 0;
+      margin-bottom: 2rem
+    }
+
+    /* Style the tab bar */
+    .tab-bar {
+      display: flex;
+      background-color: #f2f2f2;
+    }
+
+    /* Style the tab buttons */
+    .tab-button {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      background-color: inherit;
+    }
+
+    /* Change color on hover */
+    .tab-button:hover {
+      background-color: #ddd;
+    }
+
+    /* Style the content container */
+    .tab-content {
+      display: none;
+    }
+
+    /* Show the selected tab content */
+    .active {
+      display: block;
+    }
+
+    .chart_result_container {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart_result_container.active {
+      display: flex;
+    }
+
+    @media screen and (max-width: 768px) {
+      #msform {
+        width: 100%;
+
+      }
+
+      .planets-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media screen and (max-width: 425px) {
+      .planets-wrapper {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+      }
+
+      .container {
+        padding: 0px 1rem;
+      }
+    }
+
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="tab-bar">
+    <button class="tab-button" onclick="showTab('tab1')">Return Data</button>
+    <button class="tab-button" onclick="showTab('tab2')">Return Chart</button>
+    <button class="tab-button" onclick="showTab('tab3')">Western Horoscope</button>
+  </div>
+
+  <div id="tab1" class="tab-content active">
+    <div id="form-container">
+
+      <!-- multistep form -->
+      <form id="msform">
+        <!-- progressbar -->
+        <ul id="progressbar">
+          <li class="active">Date</li>
+          <li>Location and Timezone</li>
+
+        </ul>
+        <!-- fieldsets -->
+        <fieldset>
+          <h2 class="fs-title">Return Data</h2>
+
+          <div>
+            <select id="returnType">
+              <option value="" disabled selected>Select Return Type:</option>
+              <option value="lunar_return">Lunar Return</option>
+              <option value="mars_return">Mars Return</option>
+              <option value="mercury_return">Mercury Return</option>
+              <option value="venus_return">Venus Return</option>
+              <option value="jupiter_return">Jupiter Return</option>
+              <option value="saturn_return">Saturn Return</option>
+            </select>
+            <h5 class="returnTypeError"></h5>
+          </div>
+
+          <div>
+            <select name="day" id="day">
+              <option value="" disabled selected>Select a day</option>
+            </select>
+
+            <h5 class="dayError"></h5>
+          </div>
+
+          <div>
+            <select name="month" id="month">
+              <option value="" disabled selected>Select a month</option>
+            </select>
+            <h5 class="monthError"></h5>
+          </div>
+
+          <div>
+            <select name="year" id="year">
+              <option value="" disabled selected>Select a year</option>
+            </select>
+            <h5 class="yearError"></h5>
+          </div>
+
+          <div>
+            <select name="hour" id="hour">
+              <option value="" disabled selected>Select an hour</option>
+
+            </select>
+            <h5 class="hourError"></h5>
+          </div>
+
+          <div>
+            <select name="minute" id="minute">
+              <option value="" disabled selected>Select a minute</option>
+            </select>
+            <h5 class="minuteError"></h5>
+          </div>
+
+          <div>
+            <textarea id="address" cols="30" rows="3" placeholder="Address"></textarea>
+            <h5 class="addressError"></h5>
+          </div>
+
+          <a class="submit action-button" target="_top">Submit</a>
+        </fieldset>
+      </form>
+    </div>
+
+    <!-- Add a result section with an id -->
+
+    <div class="container">
+      <p id="lilith-container"></p>
+      <p id="ascendant"></p>
+      <p id="midheaven"></p>
+      <p id="vertex"></p>
+      <p id="return-planet"></p>
+      <p id="natal-return-planet-degree"></p>
+      <div id="planets-container"></div>
+      <p id="planet-return-date"></p>
+
+      <button class="close-btn" role="button">Back to form</button>
+    </div>
+
+    <div id="result-container">
+    </div>
+
+
+
+    <!-- Add a modal element to your HTML -->
+
+
+    <!-- Add an empty div to show loading state -->
+    <div class="loading">
+      <span class="loader"></span>
+    </div>
+  </div>
+
+  <div id="tab2" class="tab-content">
+    <div id="form-container" class="chart_form">
+      <!-- multistep form -->
+      <form id="chartForm">
+        <fieldset>
+          <h2 class="fs-title">Return Chart</h2>
+
+          <div>
+            <select name="chartType" id="chartType">
+              <option value="" disabled selected>Select Chart Type:</option>
+              <option value="lunar_return_chart">Lunar Return Chart</option>
+              <option value="mars_return_chart">Mars Return Chart</option>
+              <option value="mercury_return_chart">Mercury Return Chart</option>
+              <option value="venus_return_chart">Venus Return Chart</option>
+              <option value="jupiter_return_chart">Jupiter Return Chart</option>
+              <option value="saturn_return_chart">Saturn Return Chart</option>
+            </select>
+            <h5 class="chartyTypeError"></h5>
+          </div>
+
+          <div>
+            <select name="day" id="chartday">
+              <option value="" disabled selected>Select a day</option>
+            </select>
+            <h5 class="dayErrorChart"></h5>
+          </div>
+
+          <div>
+            <select name="month" id="chartmonth">
+              <option value="" disabled selected>Select a month</option>
+            </select>
+            <h5 class="monthErrorChart"></h5>
+          </div>
+
+          <div>
+            <select name="year" id="chartyear">
+              <option value="" disabled selected>Select a year</option>
+            </select>
+            <h5 class="yearErrorChart"></h5>
+          </div>
+
+          <div>
+            <select name="hour" id="charthour">
+              <option value="" disabled selected>Select an hour</option>
+
+            </select>
+            <h5 class="hourErrorChart"></h5>
+          </div>
+
+          <div>
+            <select name="minute" id="chartminute">
+              <option value="" disabled selected>Select a minute</option>
+            </select>
+            <h5 class="minuteErrorChart"></h5>
+          </div>
+
+          <div>
+            <textarea id="chartaddress" cols="30" rows="3" placeholder="Address"></textarea>
+            <h5 class="addressErrorChart"></h5>
+          </div>
+
+          <a class="chartSubmit action-button" target="_top">Submit</a>
+        </fieldset>
+      </form>
+    </div>
+
+    <!-- Add a result section with an id -->
+
+    <div class="chart_result_container">
+      <img id="chartImage" src="" alt="chart">
+    </div>
+
+
+
+    <!-- Add a modal element to your HTML -->
+
+
+    <!-- Add an empty div to show loading state -->
+    <div class="loading">
+      <span class="loader"></span>
+    </div>
+  </div>
+
+  <div id="tab3" class="tab-content">
+    <div id="form-container">
+
+      <!-- multistep form -->
+      <form id="westernHorsocopeForm">
+        <!-- progressbar -->
+        <ul id="progressbar">
+          <li class="active">Date</li>
+          <li>Location and Timezone</li>
+
+        </ul>
+        <!-- fieldsets -->
+        <fieldset>
+          <h2 class="fs-title">Western Horoscope</h2>
+
+          <div>
+            <select name="day" id="day">
+              <option value="" disabled selected>Select a day</option>
+            </select>
+
+            <h5 class="dayError"></h5>
+          </div>
+
+          <div>
+            <select name="month" id="month">
+              <option value="" disabled selected>Select a month</option>
+            </select>
+            <h5 class="monthError"></h5>
+          </div>
+
+          <div>
+            <select name="year" id="year">
+              <option value="" disabled selected>Select a year</option>
+            </select>
+            <h5 class="yearError"></h5>
+          </div>
+
+          <div>
+            <select name="hour" id="hour">
+              <option value="" disabled selected>Select an hour</option>
+
+            </select>
+            <h5 class="hourError"></h5>
+          </div>
+
+          <div>
+            <select name="minute" id="minute">
+              <option value="" disabled selected>Select a minute</option>
+            </select>
+            <h5 class="minuteError"></h5>
+          </div>
+
+          <div>
+            <textarea id="address" cols="30" rows="3" placeholder="Address"></textarea>
+            <h5 class="addressError"></h5>
+          </div>
+
+          <a class="submit action-button" target="_top">Submit</a>
+        </fieldset>
+      </form>
+    </div>
+
+    <!-- Add a result section with an id -->
+
+    <div class="container">
+      <p id="lilith-container"></p>
+      <p id="ascendant"></p>
+      <p id="midheaven"></p>
+      <p id="vertex"></p>
+      <p id="return-planet"></p>
+      <p id="natal-return-planet-degree"></p>
+      <div id="planets-container"></div>
+      <p id="planet-return-date"></p>
+
+      <button class="close-btn" role="button">Back to form</button>
+    </div>
+
+    <div id="result-container">
+    </div>
+
+
+
+    <!-- Add a modal element to your HTML -->
+
+
+    <!-- Add an empty div to show loading state -->
+    <div class="loading">
+      <span class="loader"></span>
+    </div>
+  </div>
+
+
+
+
+
+  <script>
+    function showTab(tabId) {
+      // Hide all tab contents
+      var tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(function (content) {
+        content.classList.remove('active');
+      });
+
+      // Show the selected tab content
+      var selectedTab = document.getElementById(tabId);
+      selectedTab.classList.add('active');
+    }
+  </script>
+
+  <script>
+    // Dynamically generate year options from 1900 to 2100
+    const yearDropdown = document.getElementById("year");
+    const currentYear = new Date().getFullYear();
+
+    for (let year = 1900; year <= 2100; year++) {
+      const option = document.createElement("option");
+      option.value = year;
+      option.text = year;
+      if (year === 1990) {
+        option.selected = true; // Set 1990 as the default selected value
+      }
+      yearDropdown.add(option);
+    }
+
+    // Dynamically generate hour options from 1 to 24
+    const hourDropdown = document.getElementById("hour");
+
+    for (let hour = 1; hour <= 24; hour++) {
+      const option = document.createElement("option");
+      option.value = hour;
+      option.text = hour < 10 ? `${hour}` : hour; // Add leading zero for single-digit hours
+      hourDropdown.add(option);
+    }
+
+    // Dynamically generate minute options from 0 to 59
+    const minuteDropdown = document.getElementById("minute");
+
+    for (let minute = 0; minute <= 59; minute++) {
+      const option = document.createElement("option");
+      option.value = minute;
+      option.text = minute < 10 ? `${minute}` : minute; // Add leading zero for single-digit minutes
+      minuteDropdown.add(option);
+    }
+
+    // Dynamically generate day options from 1 to 31
+    const dayDropdown = document.getElementById("day");
+
+    for (let day = 1; day <= 31; day++) {
+      const option = document.createElement("option");
+      option.value = day;
+      option.text = day;
+      dayDropdown.add(option);
+    }
+
+
+    // Dynamically generate month options with numerical values
+    const monthDropdown = document.getElementById("month");
+    const months = [
+      { value: 1, name: "January" },
+      { value: 2, name: "February" },
+      { value: 3, name: "March" },
+      { value: 4, name: "April" },
+      { value: 5, name: "May" },
+      { value: 6, name: "June" },
+      { value: 7, name: "July" },
+      { value: 8, name: "August" },
+      { value: 9, name: "September" },
+      { value: 10, name: "October" },
+      { value: 11, name: "November" },
+      { value: 12, name: "December" }
+    ];
+
+    months.forEach(month => {
+      const option = document.createElement("option");
+      option.value = month.value;
+      option.text = month.name;
+      monthDropdown.add(option);
+    });
+
+
+
+
+
+    // CHART
+
+
+    // Dynamically generate year options from 1900 to 2100
+    const yearDropdownChart = document.getElementById("chartyear");
+    const currentYearChart = new Date().getFullYear();
+
+    for (let year = 1900; year <= 2100; year++) {
+      const option = document.createElement("option");
+      option.value = year;
+      option.text = year;
+      if (year === 1990) {
+        option.selected = true; // Set 1990 as the default selected value
+      }
+      yearDropdownChart.add(option);
+    }
+
+    // Dynamically generate hour options from 1 to 24
+    const hourDropdownChart = document.getElementById("charthour");
+
+    for (let hour = 1; hour <= 24; hour++) {
+      const option = document.createElement("option");
+      option.value = hour;
+      option.text = hour < 10 ? `${hour}` : hour; // Add leading zero for single-digit hours
+      hourDropdownChart.add(option);
+    }
+
+    // Dynamically generate minute options from 0 to 59
+    const minuteDropdownChart = document.getElementById("chartminute");
+
+    for (let minute = 0; minute <= 59; minute++) {
+      const option = document.createElement("option");
+      option.value = minute;
+      option.text = minute < 10 ? `${minute}` : minute; // Add leading zero for single-digit minutes
+      minuteDropdownChart.add(option);
+    }
+
+    // Dynamically generate day options from 1 to 31
+    const dayDropdownChart = document.getElementById("chartday");
+
+    for (let day = 1; day <= 31; day++) {
+      const option = document.createElement("option");
+      option.value = day;
+      option.text = day;
+      dayDropdownChart.add(option);
+    }
+
+
+    // Dynamically generate month options with numerical values
+    const monthDropdownChart = document.getElementById("chartmonth");
+    const monthsChart = [
+      { value: 1, name: "January" },
+      { value: 2, name: "February" },
+      { value: 3, name: "March" },
+      { value: 4, name: "April" },
+      { value: 5, name: "May" },
+      { value: 6, name: "June" },
+      { value: 7, name: "July" },
+      { value: 8, name: "August" },
+      { value: 9, name: "September" },
+      { value: 10, name: "October" },
+      { value: 11, name: "November" },
+      { value: 12, name: "December" }
+    ];
+
+    monthsChart.forEach(month => {
+      const option = document.createElement("option");
+      option.value = month.value;
+      option.text = month.name;
+      monthDropdownChart.add(option);
+    });
+
+  </script>
+
+  <!-- Use a specific version of jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Include jQuery Easing Plugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+  <script>
+    const form = document.querySelector("#form-container");
+    const close = document.querySelector(".close-btn");
+    const res = document.querySelector("#result-container");
+    const chartBtn = document.querySelector(".chartSubmit");
+
+
+
+    close.addEventListener("click", () => {
+      form.classList.remove("form-toggle")
+      res.classList.add("hidden")
+      close.classList.add("hidden")
+
+      // Clear result container
+      document.querySelector(".planets-wrapper").innerHTML = "";
+      document.getElementById("lilith-container").innerHTML = "";
+      document.getElementById("ascendant").innerHTML = "";
+      document.getElementById("midheaven").innerHTML = "";
+      document.getElementById("vertex").innerHTML = "";
+      document.getElementById("return-planet").innerHTML = "";
+      document.getElementById("natal-return-planet-degree").innerHTML = "";
+      document.getElementById("planet-return-date").innerHTML = "";
+    })
+
+
+    // Function to handle address-to-coordinates using Google Geocoding API
+    async function getAddressCoordinates(address) {
+      console.log(address);
+
+      const geocodingApiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+
+      const geocodingParams = {
+        // address: "374 William S Canning Blvd, Fall River MA 2721",
+        address: address,
+        key: 'AIzaSyBVgc7I3gHiNOySPArfJf8uKzt8YIiBbfE', // Replace with your actual API key
+      };
+
+      const geocodingUrl = `${geocodingApiUrl}?${new URLSearchParams(geocodingParams)}`;
+
+
+      return fetch(geocodingUrl)
+        .then(response => {
+          console.log(response);
+          if (!response.ok) {
+            throw new Error('Geocoding API request failed');
+          }
+          return response.json();
+        })
+        .then(async data => {
+          const currentTimestamp = Math.floor(Date.now() / 1000);
+          const { lat, lng } = data.results[0].geometry.location;
+          const timeZoneUrl = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat}%2C${lng}&timestamp=${currentTimestamp}&key=AIzaSyCIz88kWeVF6CxsO0744U0Pffgv_8PaZQ4`;
+          const res = await timeZone(lat, lng, timeZoneUrl);
+        });
+    }
+
+
+    const timeZone = (lat, lng, timeZoneUrl) => {
+
+      return fetch(timeZoneUrl)
+        .then(response => {
+          console.log(response);
+          if (!response.ok) {
+            throw new Error('Timezone API request failed');
+          }
+          return response.json();
+        })
+        .then(data => {
+
+          const { dstOffset, rawOffset } = data;
+          const timeZoneOffsetHours = (rawOffset + dstOffset) / 3600;
+          console.log(lat, lng, timeZoneOffsetHours);
+          submitForm(lat, lng, timeZoneOffsetHours)
+          return data
+        });
+    }
+
+    const submitForm = (lat, lng, timeZoneOffsetHours) => {
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+      myHeaders.append("Authorization", "Basic NjE3NTQyOmJmOWFmZDE2MDY3MjliM2YyODAzYjFhYmI4NDYwM2Zi");
+
+
+      // Get form values
+      var formData = {
+        'day': parseFloat($('#day').val()),
+        'month': parseFloat($('#month').val()),
+        'year': parseFloat($('#year').val()),
+        'hour': parseFloat($('#hour').val()),
+        'minute': parseFloat($('#minute').val()),
+        'address': $('#address').val()
+      };
+
+
+      var urlencoded = new URLSearchParams();
+      urlencoded.append("day", formData.day);
+      urlencoded.append("month", formData.month);
+      urlencoded.append("year", formData.year);
+      urlencoded.append("hour", formData.hour);
+      urlencoded.append("min", formData.minute);
+      urlencoded.append("lat", parseFloat(lat));
+      urlencoded.append("lon", parseFloat(lng));
+      urlencoded.append("tzone", timeZoneOffsetHours)
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: urlencoded,
+        redirect: 'follow'
+      };
+
+      fetch("https://json.astrologyapi.com/v1/lunar_return", requestOptions)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(result => handleApiResponse(result))  // Call the function to handle the JSON response
+        .catch(error => console.error('Error:', error));
+
+      // Reset form or redirect as needed
+      // document.getElementById('msform').reset();
+
+
+
+
+    }
+
+    const submitChartForm = () => {
+
+    }
+
+    function validateForm() {
+      let isValid = true;
+
+
+
+      // Validate type
+      const returnType = document.getElementById('returnType');
+      const returnError = document.querySelector('.returnTypeError');
+      if (returnType.value.trim() === "") {
+        returnError.textContent = 'Please select the return type';
+        isValid = false;
+      } else {
+        returnError.textContent = '';
+      }
+
+      // Validate day
+      const day = document.getElementById('day');
+      const dayError = document.querySelector('.dayError');
+      if (day.value.trim() === "") {
+        dayError.textContent = 'Please select a day.';
+        isValid = false;
+      } else {
+        dayError.textContent = '';
+      }
+
+      // Validate address
+      const address = document.getElementById('address');  // <-- Should be 'address', not 'day'
+      const addressError = document.querySelector('.addressError');
+      // console.log(addressError);
+      if (address.value.trim() === "") {
+        addressError.textContent = 'Please input a valid address';
+        isValid = false;
+      } else {
+        addressError.textContent = '';
+      }
+
+      // Validate month
+      const month = document.getElementById('month');
+      const monthError = document.querySelector('.monthError');
+      if (month.value.trim() === "") {
+        monthError.textContent = 'Please select a month.';
+        isValid = false;
+      } else {
+        monthError.textContent = '';
+      }
+
+      // Validate year
+      const year = document.getElementById('year');
+      const yearError = document.querySelector('.yearError');
+      if (year.value.trim() === "") {
+        yearError.textContent = 'Please select a year.';
+        isValid = false;
+      } else {
+        yearError.textContent = '';
+      }
+
+      // Validate hour
+      const hour = document.getElementById('hour');
+      const hourError = document.querySelector('.hourError');
+      if (hour.value.trim() === "") {
+        hourError.textContent = 'Please select an hour.';
+        isValid = false;
+      } else {
+        hourError.textContent = '';
+      }
+
+      // Validate minute
+      const minute = document.getElementById('minute');
+      const minuteError = document.querySelector('.minuteError');
+      if (minute.value.trim() === "") {
+        minuteError.textContent = 'Please select a minute.';
+        isValid = false;
+      } else {
+        minuteError.textContent = '';
+      }
+
+
+      return isValid;
+    }
+
+    function validateFormChart() {
+      let isValid = true;
+
+      // Validate day
+      const day = document.getElementById('chartday');
+      const dayError = document.querySelector('.dayErrorChart');
+
+      console.log(day.value);
+      if (day.value.trim() === "") {
+        dayError.textContent = 'Please select a day.';
+        console.log(dayError);
+        isValid = false;
+      } else {
+        dayError.textContent = '';
+      }
+
+      // Validate chart type
+      const type = document.getElementById('chartType');  // <-- Should be 'address', not 'day'
+      const chartError = document.querySelector('.chartyTypeError');
+      // console.log(addressError);
+      if (type.value.trim() === "") {
+        chartError.textContent = 'Please select a chart type.';
+        isValid = false;
+      } else {
+        chartError.textContent = '';
+      }
+
+      // Validate address
+      const address = document.getElementById('chartaddress');  // <-- Should be 'address', not 'day'
+      const addressError = document.querySelector('.addressErrorChart');
+      // console.log(addressError);
+      if (address.value.trim() === "") {
+        addressError.textContent = 'Please input a valid address';
+        isValid = false;
+      } else {
+        addressError.textContent = '';
+      }
+
+      // Validate month
+      const month = document.getElementById('chartmonth');
+      const monthError = document.querySelector('.monthErrorChart');
+      if (month.value.trim() === "") {
+        monthError.textContent = 'Please select a month.';
+        isValid = false;
+      } else {
+        monthError.textContent = '';
+      }
+
+      // Validate year
+      const year = document.getElementById('year');
+      const yearError = document.querySelector('.yearErrorChart');
+      if (year.value.trim() === "") {
+        yearError.textContent = 'Please select a year.';
+        isValid = false;
+      } else {
+        yearError.textContent = '';
+      }
+
+      // Validate hour
+      const hour = document.getElementById('charthour');
+      const hourError = document.querySelector('.hourErrorChart');
+      if (hour.value.trim() === "") {
+        hourError.textContent = 'Please select an hour.';
+        isValid = false;
+      } else {
+        hourError.textContent = '';
+      }
+
+      // Validate minute
+      const minute = document.getElementById('chartminute');
+      const minuteError = document.querySelector('.minuteErrorChart');
+      if (minute.value.trim() === "") {
+        minuteError.textContent = 'Please select a minute.';
+        isValid = false;
+      } else {
+        minuteError.textContent = '';
+      }
+
+
+      return isValid;
+    }
+
+
+    async function getAddressCoordinatesChart(formData) {
+      console.log(formData);
+
+      const geocodingApiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+
+      const geocodingParams = {
+        // address: "374 William S Canning Blvd, Fall River MA 2721",
+        address: formData.address,
+        key: 'AIzaSyBVgc7I3gHiNOySPArfJf8uKzt8YIiBbfE', // Replace with your actual API key
+      };
+
+      const geocodingUrl = `${geocodingApiUrl}?${new URLSearchParams(geocodingParams)}`;
+
+
+      return fetch(geocodingUrl)
+        .then(response => {
+          console.log(response);
+          if (!response.ok) {
+            throw new Error('Geocoding API request failed');
+          }
+          return response.json();
+        })
+        .then(async data => {
+          console.log(data);
+          const currentTimestamp = Math.floor(Date.now() / 1000);
+          const { lat, lng } = data.results[0].geometry.location;
+          const timeZoneUrl = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat}%2C${lng}&timestamp=${currentTimestamp}&key=AIzaSyCIz88kWeVF6CxsO0744U0Pffgv_8PaZQ4`;
+          const res = await timeZoneChart(lat, lng, timeZoneUrl, formData);
+        });
+    }
+
+
+    const timeZoneChart = (lat, lng, timeZoneUrl, formData) => {
+      return fetch(timeZoneUrl)
+        .then(response => {
+          console.log(response);
+          if (!response.ok) {
+            throw new Error('Timezone API request failed');
+          }
+          return response.json();
+        })
+        .then(data => {
+
+          const { dstOffset, rawOffset } = data;
+          const timeZoneOffsetHours = (rawOffset + dstOffset) / 3600;
+          console.log(lat, lng, timeZoneOffsetHours);
+          submitFormChart(lat, lng, timeZoneOffsetHours, formData)
+          return data
+        });
+    }
+
+    const submitFormChart = (lat, lng, timeZoneOffsetHours, formData) => {
+      console.log(formData);
+      console.log(lat, lng, timeZoneOffsetHours);
+      const chartType = document.getElementById("chartType").value;
+      console.log(chartType);
+      const endpoint = `https://json.astrologyapi.com/v1/${chartType}`;
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+      myHeaders.append("Authorization", "Basic NjE3NTQyOmJmOWFmZDE2MDY3MjliM2YyODAzYjFhYmI4NDYwM2Zi");
+
+
+
+      var urlencoded = new URLSearchParams();
+      urlencoded.append("day", formData.day);
+      urlencoded.append("month", formData.month);
+      urlencoded.append("year", formData.year);
+      urlencoded.append("hour", formData.hour);
+      urlencoded.append("min", formData.minute);
+      urlencoded.append("lat", parseFloat(lat));
+      urlencoded.append("lon", parseFloat(lng));
+      urlencoded.append("tzone", timeZoneOffsetHours)
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: urlencoded,
+        redirect: 'follow'
+      };
+
+      fetch(endpoint, requestOptions)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(result => handleApiResponseChart(result))  // Call the function to handle the JSON response
+        .catch(error => console.error('Error:', error));
+
+      // Reset form or redirect as needed
+      document.getElementById('chartForm').reset();
+
+
+
+
+    }
+
+
+
+
+
+
+    chartBtn.addEventListener("click", function (event) {
+      event.preventDefault();
+      console.log(event);
+      // / Get form values
+      var formData = {
+        'day': parseFloat($('#chartday').val()),
+        'month': parseFloat($('#chartmonth').val()),
+        'year': parseFloat($('#chartyear').val()),
+        'hour': parseFloat($('#charthour').val()),
+        'minute': parseFloat($('#chartminute').val()),
+        'address': $('#chartaddress').val(),
+        'chartType': $("#chartType").val()
+      };
+      console.log(formData);
+
+      const loadingElement = document.querySelector(".loading");
+      loadingElement.classList.add("toggle");
+
+      setTimeout(function () {
+        // Hide loading state
+        loadingElement.classList.remove("toggle");
+
+        // Validate the form
+        if (!validateFormChart()) {
+          console.log("return");
+          return;
+        }
+
+        // Clear existing error messages
+        document.querySelectorAll('.error-message').forEach(function (element) {
+          element.textContent = "";
+        });
+
+        getAddressCoordinatesChart(formData)
+      });
+    });
+
+
+
+
+    document.querySelector(".submit").addEventListener("click", function (event) {
+      event.preventDefault();
+      // / Get form values
+      var formData = {
+        'day': parseFloat($('#day').val()),
+        'month': parseFloat($('#month').val()),
+        'year': parseFloat($('#year').val()),
+        'hour': parseFloat($('#hour').val()),
+        'minute': parseFloat($('#minute').val()),
+        'address': $('#address').val()
+      };
+
+      const loadingElement = document.querySelector(".loading");
+      loadingElement.classList.add("toggle");
+
+      setTimeout(function () {
+        // Hide loading state
+        loadingElement.classList.remove("toggle");
+
+        // Validate the form
+        if (!validateForm()) {
+          return;
+        }
+
+        // Clear existing error messages
+        document.querySelectorAll('.error-message').forEach(function (element) {
+          element.textContent = "";
+        });
+
+        getAddressCoordinates(formData.address)
+      });
+    });
+
+    // Function to handle API response and display it in the modal
+    function handleApiResponse(response) {
+      // Display the response details in the modal
+      console.log(response);
+      close.style.display = "block";
+      form.classList.add("form-toggle")
+      close.classList.remove("hidden")
+      res.classList.remove("hidden")
+
+      // Display planet details
+      const planetsContainer = document.getElementById("planets-container");
+      planetsContainer.innerHTML = ""; // Clear previous content
+      const planetWrap = document.createElement("div");
+
+      const planetsWrapper = document.createElement("div");
+      planetsWrapper.classList.add("planets-wrapper");
+
+      response.planets.forEach(planet => {
+        const planetFlex = document.createElement("div");
+        planetFlex.classList.add("planet-flex");
+
+        planetFlex.innerHTML = `
+          <span><h3>Planet: </h3><p>${planet?.name}</p></span>
+          <span><h3>Sign: </h3><p>${planet?.sign}</p></span>
+          <span><h3>House: </h3><p>${planet?.house}</p></span>
+          
+        `;
+
+        // Append planetFlex to the wrapper div
+        planetsWrapper.appendChild(planetFlex);
+      });
+
+      // Append the wrapper div to the main planetsContainer
+      res.appendChild(planetsWrapper);
+
+
+      // Display Lilith details
+      const lilithContainer = document.getElementById("lilith-container");
+      lilithContainer.innerHTML = `<span><h3>Lilith: </h3><p>${response.lilith.name}, Sign: ${response.lilith.sign}, House: ${response.lilith.house}</p></span>`
+
+      // Display other details
+      document.getElementById("ascendant").innerHTML = `<span><h3>Ascendant: </h3><p>${response?.ascendant}</p></span>`;
+      document.getElementById("midheaven").innerHTML = `<span><h3>Midheaven: </h3><p>${response?.midheaven}</p></span>`;
+      document.getElementById("vertex").innerHTML = `<span><h3>Vertex: </h3><p>${response?.vertex}</p></span>`;
+
+      document.getElementById("return-planet").innerHTML = `<span><h3>Return Planet: </h3><p>${response?.return_planet}</p></span>`;
+      document.getElementById("natal-return-planet-degree").innerHTML = `<span><h3>Natal Return Planet Degree: </h3><p>${response.natal_return_planet_degree}</p></span>`;
+      document.getElementById("planet-return-date").innerHTML = `<span><h3>Planet Return Date: </h3><p>${response.planet_return_date}</p></span>`;
+    }
+
+    function handleApiResponseChart(response) {
+      // Display the response details in the modal
+      const cont = document.querySelector(".chart_form")
+      const chart = document.getElementById("chartImage");
+      const chartContainer = document.querySelector(".chart_result_container");
+
+      chartContainer.classList.add("active")
+      chart.src = response.chart_url
+      cont.classList.add("hidden")
+
+
+    }
+
+
+
+  </script>
+
+  <script>
+
+    //jQuery time
+    var current_fs, next_fs, previous_fs; //fieldsets
+    var left, opacity, scale; //fieldset properties which we will animate
+    var animating; //flag to prevent quick multi-click glitches
+
+    $(".next").click(function () {
+      if (animating) return false;
+      animating = true;
+
+      current_fs = $(this).parent();
+      next_fs = $(this).parent().next();
+
+      //activate next step on progressbar using the index of next_fs
+      $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+      //show the next fieldset
+      next_fs.show();
+      //hide the current fieldset with style
+      current_fs.animate({ opacity: 0 }, {
+        step: function (now, mx) {
+          //as the opacity of current_fs reduces to 0 - stored in "now"
+          //1. scale current_fs down to 80%
+          scale = 1 - (1 - now) * 0.2;
+          //2. bring next_fs from the right(50%)
+          left = (now * 50) + "%";
+          //3. increase opacity of next_fs to 1 as it moves in
+          opacity = 1 - now;
+          current_fs.css({
+            'transform': 'scale(' + scale + ')',
+            // 'position': 'absolute'
+          });
+          next_fs.css({ 'left': left, 'opacity': opacity });
+        },
+        duration: 800,
+        complete: function () {
+          current_fs.hide();
+          animating = false;
+        },
+        //this comes from the custom easing plugin
+        easing: 'easeInOutBack'
+      });
+    });
+
+    $(".previous").click(function () {
+      if (animating) return false;
+      animating = true;
+
+      current_fs = $(this).parent();
+      previous_fs = $(this).parent().prev();
+
+      //de-activate current step on progressbar
+      $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+      //show the previous fieldset
+      previous_fs.show();
+      //hide the current fieldset with style
+      current_fs.animate({ opacity: 0 }, {
+        step: function (now, mx) {
+          //as the opacity of current_fs reduces to 0 - stored in "now"
+          //1. scale previous_fs from 80% to 100%
+          scale = 0.8 + (1 - now) * 0.2;
+          //2. take current_fs to the right(50%) - from 0%
+          left = ((1 - now) * 50) + "%";
+          //3. increase opacity of previous_fs to 1 as it moves in
+          opacity = 1 - now;
+          current_fs.css({ 'left': left });
+          previous_fs.css({ 'transform': 'scale(' + scale + ')', 'opacity': opacity });
+        },
+        duration: 800,
+        complete: function () {
+          current_fs.hide();
+          animating = false;
+        },
+        //this comes from the custom easing plugin
+        easing: 'easeInOutBack'
+      });
+    });
+
+
+  </script>
+
+
+
+
+
+
+
+</body>
+
+</html>
